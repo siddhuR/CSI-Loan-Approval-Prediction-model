@@ -1,0 +1,227 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler
+from sklearn import svm
+from sklearn.metrics import accuracy_score
+
+loan_dataset = pd.read_csv('loanpredication.csv')
+type(loan_dataset)
+# printing the first 5 rows of the dataframe
+loan_dataset.head()
+loan_dataset.info()
+​
+# number of rows and columns
+loan_dataset.shape
+# statistical measures
+loan_dataset.describe()
+​
+# number of missing values in each column
+loan_dataset.isnull().sum()
+loan_dataset['loanAmount_log']=np.log(loan_dataset['LoanAmount'])
+loan_dataset['loanAmount_log'].hist(bins=20)
+loan_dataset.shape
+loan_dataset.isnull().sum()
+loan_dataset['TotalIncome']= loan_dataset['ApplicantIncome']+ loan_dataset['CoapplicantIncome']
+loan_dataset['TotalIncome_log']=np.log(loan_dataset['TotalIncome'])
+loan_dataset['TotalIncome_log'].hist(bins=20)
+loan_dataset.shape
+loan_dataset.describe()
+loan_dataset['Gender'].fillna(loan_dataset['Gender'].mode()[0], inplace = True)
+loan_dataset['Married'].fillna(loan_dataset['Married'].mode()[0], inplace = True)
+loan_dataset['Self_Employed'].fillna(loan_dataset['Self_Employed'].mode()[0], inplace = True)
+loan_dataset['Dependents'].fillna(loan_dataset['Dependents'].mode()[0], inplace = True)
+​
+loan_dataset.LoanAmount = loan_dataset.LoanAmount.fillna(loan_dataset.LoanAmount.mean())
+loan_dataset.loanAmount_log = loan_dataset.loanAmount_log.fillna(loan_dataset.loanAmount_log.mean())
+​
+loan_dataset['Loan_Amount_Term'].fillna(loan_dataset['Loan_Amount_Term'].mode()[0], inplace = True)
+loan_dataset['Credit_History'].fillna(loan_dataset['Credit_History'].mode()[0], inplace = True)
+loan_dataset.shape
+loan_dataset.isnull().sum()
+​
+x= loan_dataset.iloc[:,np.r_[1:5,9:11,13:15]].values
+y= loan_dataset.iloc[:,12].values
+x
+y
+# label encoding
+loan_dataset.replace({"Loan_Status":{'N':0,'Y':1}},inplace=True)
+# printing the first 5 rows of the dataframe
+loan_dataset.head()
+# Dependent column values
+loan_dataset['Dependents'].value_counts()
+# replacing the value of 3+ to 4
+loan_dataset = loan_dataset.replace(to_replace='3+', value=4)
+# dependent values
+loan_dataset['Dependents'].value_counts()
+print("per of missing gender is %2f%%" %((loan_dataset['Gender'].isnull().sum()/loan_dataset.shape[0])*100))
+# education & Loan Status
+print("number of people who take loan as group by education status: ")
+print(loan_dataset['Education'].value_counts())
+sns.countplot(x='Education',hue='Loan_Status',data=loan_dataset, palette ='Set1')
+print("number of people who take loan as group by gender: ")
+print(loan_dataset['Gender'].value_counts())
+sns.countplot(x='Gender',hue='Loan_Status', data=loan_dataset, palette = 'Set1')
+# marital status & Loan Status
+print("number of people who take loan as group by marital status: ")
+print(loan_dataset['Married'].value_counts())
+sns.countplot(x='Married',hue='Loan_Status',data=loan_dataset, palette = 'Set1')
+print("number of people who take loan as group by dependents: ")
+print(loan_dataset['Dependents'].value_counts())
+sns.countplot(x='Dependents', data=loan_dataset, palette = 'Set1')
+​
+print("number of people who take loan as group by self employed: ")
+print(loan_dataset['Self_Employed'].value_counts())
+sns.countplot(x='Self_Employed',hue='Loan_Status',data=loan_dataset, palette = 'Set1')
+print("number of people who take loan as group by Loanamount: ")
+print(loan_dataset['LoanAmount'].value_counts())
+sns.countplot(x='LoanAmount',data=loan_dataset, palette = 'Set1')
+print("Number of people who take a loan grouped by Loan Amount:")
+print(loan_dataset['LoanAmount'].value_counts())
+​
+# Convert to line chart
+plt.figure(figsize=(10, 6))
+loan_amount_counts = loan_dataset['LoanAmount'].value_counts()
+loan_amount_counts.sort_index().plot(kind='line', color='steelblue')
+​
+# Set the labels and title
+plt.xlabel('Loan Amount')
+plt.ylabel('Count')
+plt.title('Distribution of Loan Amounts')
+​
+# Display the chart
+plt.show()
+print("number of people who take loan as group by Credit history: ")
+print(loan_dataset['Credit_History'].value_counts())
+sns.countplot(x='Credit_History',data=loan_dataset, palette = 'Set1')
+Training the model:
+X_train, X_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, random_state=0)
+Labelencoder_x = LabelEncoder()
+for i in range(0, 5):
+    X_train[:,i]= Labelencoder_x.fit_transform(X_train[:,i])
+    X_train[:,7]= Labelencoder_x.fit_transform(X_train[:,7])
+X_train
+Labelencoder_y = LabelEncoder()
+y_train = Labelencoder_y.fit_transform(y_train)
+​
+y_train
+for i in range(0,5):
+    X_test[:,i]=Labelencoder_x.fit_transform(X_test[:,i])
+    X_test[:,7] = Labelencoder_x.fit_transform(X_test[:,7])
+X_test
+labelencoder_y = LabelEncoder()
+y_test= Labelencoder_y.fit_transform(y_test)
+y_test
+X_train
+ss = StandardScaler()
+X_train = ss.fit_transform(X_train)
+x_test = ss.fit_transform(X_test)
+#
+# print(x)
+# print(y)
+# 
+# X_train, X_test,Y_train,Y_test = train_test_split(x,y,test_size=0.1,stratify=y,random_state=2)
+#
+print(x.shape, X_train.shape, X_test.shape)
+Random Forest Classifier:
+from sklearn.ensemble import RandomForestClassifier
+​
+rf_clf = RandomForestClassifier()
+rf_clf.fit(X_train, y_train)
+from sklearn import metrics
+y_pred = rf_clf.predict(x_test)
+​
+print("act of random forest clf is", metrics.accuracy_score(y_pred, y_test))
+​
+y_pred
+Gaussian Naive Bayes Classifier:
+from sklearn.naive_bayes import GaussianNB
+nb_classifier = GaussianNB()
+nb_classifier.fit(X_train, y_train)
+y_pred = nb_classifier.predict(X_test)
+print("acc of gaussianNB is %.", metrics.accuracy_score(y_pred, y_test) )
+y_pred
+Decision Tree Classifier:
+from sklearn.tree import DecisionTreeClassifier
+dt_clf = DecisionTreeClassifier()
+dt_clf.fit(X_train, y_train)
+y_pred = dt_clf.predict(X_test)
+print("acc of DT is", metrics.accuracy_score(y_pred, y_test))
+y_pred
+K-Nearest Neighbors Classifier:
+from sklearn.neighbors import KNeighborsClassifier
+kn_clf = KNeighborsClassifier()
+kn_clf.fit(X_train, y_train)
+y_pred = kn_clf.predict(X_test)
+print("acc of KN is ", metrics.accuracy_score(y_pred, y_test))
+Support Vector Machine (SVM) Classifier:
+#training the support Vector Macine model
+clf = svm.SVC(kernel='linear')
+clf.fit(X_train,y_train)
+# accuracy score on training data
+X_train_prediction = clf.predict(X_train)
+training_data_accuray = accuracy_score(X_train_prediction,y_train)
+print('Accuracy on training data : ', training_data_accuray)
+​
+​
+# accuracy score on training data
+X_test_prediction = rf_clf.predict(X_test)
+test_data_accuray = accuracy_score(X_test_prediction,y_test)
+print('Accuracy on test data : ', test_data_accuray)
+LogisticRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+# Encode loan approval status
+label_encoder = LabelEncoder()
+y_train_encoded = label_encoder.fit_transform(y_train)
+y_test_encoded = label_encoder.transform(y_test)
+# Create an instance of the logistic regression model
+logreg = LogisticRegression()
+# Fit the model to the training data
+logreg.fit(X_train, y_train_encoded)
+# Predict loan approval status for the test data
+y_pred_encoded = logreg.predict(X_test)
+# Reverse label encoding for evaluation metrics
+y_test_decoded = label_encoder.inverse_transform(y_test_encoded)
+y_pred_decoded = label_encoder.inverse_transform(y_pred_encoded)
+# Map labels to binary values (0 and 1)
+y_test_binary = y_test_decoded.astype(int)
+y_pred_binary = y_pred_decoded.astype(int)
+# Evaluation metrics
+accuracy = accuracy_score(y_test_binary, y_pred_binary)
+precision = precision_score(y_test_binary, y_pred_binary)
+recall = recall_score(y_test_binary, y_pred_binary)
+f1 = f1_score(y_test_binary, y_pred_binary)
+# Print the evaluation metrics
+print("Accuracy: ", accuracy)
+print("Precision: ", precision)
+print("Recall: ", recall)
+print("F1 Score: ", f1)
+Preparing the Report
+from imblearn.over_sampling import RandomOverSampler
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+# Apply Random Oversampling to handle class imbalance
+oversampler = RandomOverSampler(random_state=0)
+X_train_oversampled, y_train_oversampled = oversampler.fit_resample(X_train, y_train)
+# Train the model on the oversampled data
+logreg = LogisticRegression()
+logreg.fit(X_train_oversampled, y_train_oversampled)
+# Predict loan approval status for the test data
+y_pred = logreg.predict(X_test)
+# Evaluate the model
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
+​
+# # Predict loan approval status for the test data
+# y_pred = logreg.predict(X_test)
+​
+# Generate confusion matrix
+confusion_matrix = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(confusion_matrix)
