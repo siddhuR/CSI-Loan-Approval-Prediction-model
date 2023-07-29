@@ -18,7 +18,7 @@ def get_user_inputs():
     # Encode user inputs similar to the training dataset
     user_inputs = np.array([[age, income, employment_status, loan_amount, loan_purpose, 0, 0, 0]])  # Add three additional zeros for missing features
 
-    # Load the LabelEncoders and StandardScaler used in Part 1
+    # Load the LabelEncoders and StandardScaler
     label_encoder_employment = LabelEncoder()
     label_encoder_loan_purpose = LabelEncoder()
     scaler = StandardScaler()
@@ -43,7 +43,7 @@ def predict_loan_approval(user_inputs):
 
     # Decode prediction (0: Not Approved, 1: Approved)
     label_encoder = LabelEncoder()
-    label_encoder.fit(['N', 'Y'])  # Fit the encoder on the target variable 'Loan_Status'
+    label_encoder.fit(['No!! you are not eligible for the loan', 'Yes!! you are eligible for the loan'])  # Fit the encoder on the target variable 'Loan_Status'
     prediction_decoded = label_encoder.inverse_transform(prediction)
 
     return prediction_decoded[0]
@@ -56,6 +56,9 @@ def main():
     st.sidebar.image("celebal label cover picture.png", width=200, use_column_width='always')
     st.sidebar.title("Routhu Siddhartha")
     st.sidebar.markdown("Welcome to the Loan Prediction Model..!")
+    st.sidebar.markdown("Under the Guidance of Devesh Vijay Sir")
+    st.sidebar.markdown("<h2 style='color: #ff5555;'>CELEBAL TECHNOLOGIES</h2>", unsafe_allow_html=True)
+    st.sidebar.markdown("---")
     st.sidebar.markdown(":e-mail: routhusiddhartha@gmail.com")
     st.sidebar.markdown("\U0001F476 [GitHub](https://github.com/siddhuR)")
     st.sidebar.markdown("\U0001F517 [LinkedIn](https://www.linkedin.com/in/siddhur/)")
@@ -89,9 +92,6 @@ def main():
     # Footer
     st.markdown("---")
     st.write("This portal is created with ❤️ using Streamlit by Routhu Siddhartha.")
-
-
-# Rest of the code...
 
 if __name__ == "__main__":
     main()
